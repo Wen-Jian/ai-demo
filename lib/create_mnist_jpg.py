@@ -22,10 +22,10 @@ def x_train_set_to_jpg():
     for e in x_train:
         img = np.array(e, dtype='float').reshape(28,28)
         scipy.misc.imsave(
-            os.path.join(path,'x_train%d.jpg' %(count)),
+            os.path.join(path,'x_train%05d.jpg' %(count)),
             img)
         count += 1
-        print('x_train%d.jpg is saved' %(count))
+        print('x_train%05d.jpg is saved' %(count))
 
 def x_test_set_to_jpg():
     count = 1
@@ -35,10 +35,10 @@ def x_test_set_to_jpg():
     for e in x_test:
         img = np.array(e, dtype='float').reshape(28,28)
         scipy.misc.imsave(
-            os.path.join(path,'x_test%d.jpg' %(count)),
+            os.path.join(path,'x_test%05d.jpg' %(count)),
             img)
         count += 1
-        print('x_test%d.jpg is saved' %(count))
+        print('x_test%05d.jpg is saved' %(count))
 
 def img_to_data_set(files_path = None):
 
@@ -46,6 +46,7 @@ def img_to_data_set(files_path = None):
         files_path = os.path.join(os.getcwd(),'MnistImage/Train')
     
     filelist = glob.glob(os.path.join(files_path, '*.jpg'))
+    filelist.sort()
     images = []
     count = 0
     for file_name in filelist:
@@ -60,7 +61,8 @@ def img_to_data_set(files_path = None):
 
 def _parse_function(filename):
     image_np_array = cv2.imread(filename)
-    reshape_data = np.reshape(image_np_array, (28*28*3))
+    grayimg = cv2.cvtColor(image_np_array, cv2.COLOR_BGR2GRAY)
+    reshape_data = np.reshape(grayimg, (28*28))
     img = reshape_data # * 1.0/127.5 - 1.0
     return img
 
@@ -68,9 +70,17 @@ def create_all_jpg_set():
     x_train_set_to_jpg()
     x_test_set_to_jpg()
 
-def labels():
+def train_labels():
+    lable_array = []
+    for i in range(len(y_train)):
+        lable_array.append(y_train[i])
+    return lable_array
 
-    return np.reshape(y_train, (55000, 1, 10))
+def test_labels():
+    lable_array = []
+    for i in range(len(y_test)):
+        lable_array.append(y_test[i])
+    return lable_array
 # print(x_train[0].shape)
 # print(y_train.shape)
 # print(x_test.shape)
