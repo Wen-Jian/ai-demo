@@ -4,7 +4,7 @@ import basic_nn_batch as bnn
 
 def add_cnn_layer(x_input, batch_size, filter_shape, activation_function = None):
     cnn_filter = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1))
-    bias = tf.Variable(tf.constant(0.1, shape = [1,]))
+    bias = tf.Variable(tf.constant(0.1, shape = [filter_shape[3]]))
     before_pooling = tf.nn.conv2d(x_input, cnn_filter, strides=[1,1,1,1], padding='SAME')  
     if (activation_function != None):
         act_input = activation_function(before_pooling)
@@ -38,7 +38,7 @@ def train(x_input, labels, sess, input_size, out_size, batch_size, test_dataset,
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_s * tf.log(prediction), reduction_indices=[1]))
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
-    grad_and_var = tf.train.AdamOptimizer(1e-4).compute_gradients(cross_entropy)
+    # grad_and_var = tf.train.AdamOptimizer(1e-4).compute_gradients(cross_entropy)
 
     sess = tf.Session()
 
