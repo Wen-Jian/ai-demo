@@ -8,7 +8,7 @@ import create_mnist_jpg as im_creator
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
-def add_lyaer(input, input_size, out_size, activation_fucation):
+def add_lyaer(input, input_size, out_size, activation_fucation = None):
     # W1 = tf.get_variable('w1', [input_size, out_size], initializer=tf.random_normal_initializer())
     with tf.name_scope('basic_dnn_layer'):
         with tf.name_scope('weight'):
@@ -22,7 +22,7 @@ def add_lyaer(input, input_size, out_size, activation_fucation):
                 y1 = activation_fucation(tf.matmul(input, W1) + b1) 
             return y1
 
-def train(dataset, batch_ys, in_size, out_size):
+def predic_and_train(dataset, batch_ys, in_size, out_size, session, test_data_set, test_labels):
     with tf.name_scope('inputs'):
         x = tf.placeholder(tf.float32, [None, in_size], name="x_input")
         y_ = tf.placeholder(tf.float32, [None, out_size], "y_input")
@@ -34,22 +34,22 @@ def train(dataset, batch_ys, in_size, out_size):
         reduction_indices=[1]))
     with tf.name_scope('train'):
         train_step = tf.train.GradientDescentOptimizer(0.2).minimize(cross_entropy)
-    sess = tf.InteractiveSession()
-    tf.global_variables_initializer().run()
+        
+    
+    sess = session
+    session.run(tf.global_variables_initializer())
 
     writer = tf.summary.FileWriter("TensorBoard/", graph = sess.graph)
+    for i in range(len(dataset)//100):
+        # batch_xs, batch_y = batch_ys.next_batch(1)
+        sess.run(train_step, feed_dict={x: dataset[i*100:(i+1)*100], y_: batch_ys[i*100:(i+1)*100]})
+        if i%100 == 0:
+            print(sess.run(cross_entropy, feed_dict={x: dataset[i*100:(i+1)*100], y_: batch_ys[i*100:(i+1)*100]}))
 
-    for i in range(10):
-        for i in range(len(dataset)//100):
-            # batch_xs, batch_y = batch_ys.next_batch(1)
-            sess.run(train_step, feed_dict={x: dataset[i*100:(i+1)*100], y_: batch_ys[i*100:(i+1)*100]})
-            if i%100 == 0:
-                print(sess.run(cross_entropy, feed_dict={x: dataset[i:(i+1)*100], y_: batch_ys[i:(i+1)*100]}))
-    
-    test_img_file_path = os.path.join(os.getcwd(),'MnistImage/Test')
-    test_dataset = im_creator.img_to_data_set(test_img_file_path)
     correct_prediction = tf.equal(tf.argmax(y2,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    print(sess.run(accuracy, feed_dict={x: test_data_set[0:10000], y_: test_labels[0:10000]}))
+    
+    
 
-    print(np.shape(test_dataset))
-    print(sess.run(accuracy, feed_dict={x: test_dataset[0:10000], y_: im_creator.test_labels()[0:10000]}))
+   

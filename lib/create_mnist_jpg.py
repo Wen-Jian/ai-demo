@@ -61,10 +61,8 @@ def img_to_data_set(files_path = None):
 
 def _parse_function(filename):
     image_np_array = cv2.imread(filename)
-    grayimg = cv2.cvtColor(image_np_array, cv2.COLOR_BGR2GRAY)
-    reshape_data = np.reshape(grayimg, (28*28))
-    img = reshape_data # * 1.0/127.5 - 1.0
-    return img
+    
+    return image_np_array
 
 def create_all_jpg_set():
     x_train_set_to_jpg()
