@@ -12,9 +12,11 @@ def add_lyaer(input, input_size, out_size, activation_fucation = None):
     # W1 = tf.get_variable('w1', [input_size, out_size], initializer=tf.random_normal_initializer())
     with tf.name_scope('basic_dnn_layer'):
         with tf.name_scope('weight'):
-            W1 = tf.Variable(initial_value=tf.random_normal(shape=[input_size, out_size], dtype=tf.float32), dtype=tf.float32, name='weights')
+            # W1 = tf.Variable(initial_value=tf.random_normal(shape=[input_size, out_size], dtype=tf.float32), dtype=tf.float32, name='weights')
+            W1 = tf.Variable(tf.truncated_normal([input_size, out_size], stddev=0.1, name='weights'))
         with tf.name_scope('bias'):
-            b1 = tf.Variable(initial_value=tf.random_normal(shape=[1, ], dtype=tf.float32), dtype=tf.float32, name='bias')
+            b1 = tf.Variable(initial_value=tf.random_normal(shape=[1,], dtype=tf.float32), dtype=tf.float32, name='bias')
+            # b1 = tf.Variable(tf.constant(0.1, shape=[1,]))
         with tf.name_scope('activation_function'):
             if activation_fucation == None:
                 y1 = tf.nn.sigmoid(tf.matmul(input, W1) + b1) 

@@ -24,18 +24,17 @@ def train(x_input, labels, sess, input_size, out_size, batch_size, test_dataset,
     x_s = tf.placeholder(tf.float32, [None, x_shape[1], x_shape[2], x_shape[3]], "x_train")
     y_s = tf.placeholder(tf.float32, [None, y_shape[1]], "y_train")
 
-    y1 = add_cnn_layer(x_s, tf.shape(x_s)[0], [5, 5, 3, 16])
+    y1 = add_cnn_layer(x_s, tf.shape(x_s)[0], [5, 5, 3, 32])
     pool_1 = add_pooling_layer(y1)
-    y2 = add_cnn_layer(pool_1, tf.shape(pool_1)[0], [3, 3, 16, 32])
-    after_pooling = add_pooling_layer(y2)
+    # y2 = add_cnn_layer(pool_1, tf.shape(pool_1)[0], [3, 3, 32, 64])
+    # after_pooling = add_pooling_layer(y2)
 
-    pooling_shape = tf.shape(pool_1)
-    single_shape = int((input_size/4) * (input_size/4) * 32)
-    y3 = tf.reshape(tensor=after_pooling, shape=[pooling_shape[0], single_shape])
-    out_put = bnn.add_lyaer(y3, single_shape, out_size, tf.nn.relu)
-    prediction = tf.nn.softmax(out_put)
+    single_shape = int((input_size/2) * (input_size/2) * 32)
+    y3 = tf.reshape(tensor=pool_1, shape=[-1, single_shape])
+    out_put = bnn.add_lyaer(y3, single_shape, out_size, tf.nn.softmax)
+    # prediction = tf.nn.softmax(out_put)
 
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_s * tf.log(prediction), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_s * tf.log(out_put), reduction_indices=[1]))
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
     # grad_and_var = tf.train.AdamOptimizer(1e-4).compute_gradients(cross_entropy)
