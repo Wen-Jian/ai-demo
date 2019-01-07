@@ -45,13 +45,14 @@ def img_to_data_set(files_path = None):
     if files_path == None:
         files_path = os.path.join(os.getcwd(),'MnistImage/Train')
     
-    filelist = glob.glob(os.path.join(files_path, '*.jpg'))
+    filelist = glob.glob(os.path.join(files_path, '*'))
     filelist.sort()
     images = []
     count = 0
     for file_name in filelist:
         process_rate = float(count/len(filelist)) * 100
         images.append(_parse_function(file_name))
+        print(np.shape(images))
         sys.stdout.write("\rDoing thing %i ％" % process_rate)
         sys.stdout.flush()
         count += 1
