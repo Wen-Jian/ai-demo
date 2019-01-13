@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import basic_nn_batch as bnn
+import os
 import cv2
 
 def add_cnn_layer(x_input, filter_shape, activation_function = None, strides=1):
@@ -81,31 +82,37 @@ def train_generator(x_input, expected_output, sess, input_shape, out_size):
     x_s = tf.reshape(x_batch, [-1, input_shape[0], input_shape[1], int(x_shape[1]/input_shape[0]/input_shape[1])])
     y_s = tf.placeholder(tf.float32, [None, y_shape[1], y_shape[2], y_shape[3]], "y_train")
 
-    y1 = add_cnn_layer(x_s, [5, 5, 3, 32], strides=2)
+    y1 = add_cnn_layer(x_s, [8, 8, 3, 32], strides=2)
     # pool_1 = add_pooling_layer(y1) # shape = [batch, 14, 14, 32]
 
-    y2 = add_cnn_layer(y1, [3, 3, 32, 64], strides=2)
+    y2 = add_cnn_layer(y1, [8, 8, 32, 64], strides=2)
     # pool_2 = add_pooling_layer(y2) # shape = [batch, 7, 7, 64]
 
-    deconv_1 = add_deconv_layer(y2, [3, 3, 32, 64], [batch_size, tf.shape(y1)[1], tf.shape(y1)[2], 32])
+    deconv_1 = add_deconv_layer(y2, [8, 8, 32, 64], [batch_size, tf.shape(y1)[1], tf.shape(y1)[2], 32])
 
-    deconv_2 = add_deconv_layer(deconv_1, [5, 5, 3, 32], [batch_size, out_size[0], out_size[1], out_size[2]], activation_function = tf.nn.sigmoid)
+    deconv_2 = add_deconv_layer(deconv_1, [8, 8, 3, 32], [batch_size, out_size[0], out_size[1], out_size[2]], activation_function = tf.nn.sigmoid)
 
     output = deconv_2 * 255
 
     loss = tf.reduce_mean(tf.pow(output - y_s, 2))
 
-    train_step = tf.train.AdamOptimizer(0.0005).minimize(loss)
+    train_step = tf.train.AdamOptimizer(0.00001).minimize(loss)
 
     sess = tf.Session()
+    saver = tf.train.Saver()
 
-    sess.run(tf.global_variables_initializer())
+    if os.path.isfile("trained_parameters/image_generator.index"):
+        saver.restore(sess, "trained_parameters/image_generator")
+    else:
+        sess.run(tf.global_variables_initializer())
 
-    for i in range(5000):
+    for i in range(5001):
         sess.run(train_step, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]})
         print(sess.run(loss, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]}))
-        if (i % 1000 == 0):
-            cv2.imshow('image_'+str(i),sess.run(output[0], feed_dict={x_batch: x_input[1:2]/255., y_s: expected_output[1:2]}))
+        if (i % 100 == 0):
+            saver.save(sess, "trained_parameters/image_generator")
+    #     if (i % 1000 == 0):
+            # cv2.imshow('image_'+str(i),sess.run(output[0], feed_dict={x_batch: x_input[1:2]/255., y_s: expected_output[1:2]}))
     
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
