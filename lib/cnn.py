@@ -14,11 +14,11 @@ def add_cnn_layer(x_input, filter_shape, activation_function = None, strides=1):
         act_input = tf.nn.relu(before_pooling + bias)
     return act_input
     
-def add_deconv_layer(x_input, filter_shape, output_shape, activation_function=None):
+def add_deconv_layer(x_input, filter_shape, output_shape, activation_function=None, stride = 2):
     cnn_filter = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1))
     bias = tf.Variable(tf.constant(0.1, shape = [filter_shape[3]]))
     output_shape = tf.stack(output_shape)
-    y1 = tf.nn.conv2d_transpose(x_input,cnn_filter,output_shape,strides=[1,2,2,1])
+    y1 = tf.nn.conv2d_transpose(x_input,cnn_filter,output_shape,strides=[1, stride, stride, 1])
     if (activation_function == None):
         out_put = tf.nn.relu(y1)
     else:
@@ -106,13 +106,61 @@ def train_generator(x_input, expected_output, sess, input_shape, out_size):
     else:
         sess.run(tf.global_variables_initializer())
 
-    for i in range(5001):
+    for i in range(1):
         sess.run(train_step, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]})
         print(sess.run(loss, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]}))
         if (i % 100 == 0):
             saver.save(sess, "trained_parameters/image_generator")
     #     if (i % 1000 == 0):
             # cv2.imshow('image_'+str(i),sess.run(output[0], feed_dict={x_batch: x_input[1:2]/255., y_s: expected_output[1:2]}))
+    cv2.imshow('image_'+str(i),sess.run(output[0], feed_dict={x_batch: x_input[1:2]/255., y_s: expected_output[1:2]}))
+    
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+def train_heigh_resolution_generator(x_input, expected_output, sess, input_shape, out_size):
+    x_shape = np.shape(x_input)
+    y_shape = np.shape(expected_output)
+    channel_size = x_shape[1]/input_shape[0]/input_shape[1]
+    
+    x_batch = tf.placeholder(tf.float32, [None, input_shape[0] * input_shape[1] * channel_size], "x_train")
+    batch_size = tf.shape(x_batch)[0]
+    x_s = tf.reshape(x_batch, [-1, input_shape[0], input_shape[1], int(x_shape[1]/input_shape[0]/input_shape[1])])
+    y_s = tf.placeholder(tf.float32, [None, y_shape[1], y_shape[2], y_shape[3]], "y_train")
+
+    y1 = add_cnn_layer(x_s, [8, 8, 3, 32], strides=2)
+
+    y2 = add_cnn_layer(y1, [3, 3, 32, 64], strides=2)
+
+    deconv_1 = add_deconv_layer(y2, [3, 3, 32, 64], [batch_size, tf.shape(y1)[1], tf.shape(y1)[2], 32], )
+
+    deconv_2 = add_deconv_layer(deconv_1, [8, 8, 3, 32], [batch_size, tf.shape(x_s)[1], tf.shape(x_s)[2], tf.shape(x_s)[3]])
+
+    deconv_3 = add_deconv_layer(deconv_2, [5, 5, 3, 3], [batch_size, out_size[0], out_size[1], out_size[2]], stride=10)
+
+    output = deconv_3 * 255
+
+
+    loss = tf.reduce_mean(tf.pow(output - y_s, 2))
+
+    train_step = tf.train.AdamOptimizer(0.001).minimize(loss)
+
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    saver = tf.train.Saver()
+
+    if os.path.isfile("trained_parameters/heigh_resolution.index"):
+        saver.restore(sess, "trained_parameters/heigh_resolution")
+    else:
+        sess.run(tf.global_variables_initializer())
+
+    for i in range(1000001):
+        sess.run(train_step, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]})
+        print(sess.run(loss, feed_dict={x_batch: x_input[0:x_shape[0]]/255., y_s: expected_output[0:x_shape[0]]}))
+        if (i % 100 == 0):
+            saver.save(sess, "trained_parameters/heigh_resolution")
+        # if (i % 1000 == 0):
+        #     cv2.imshow('image_'+str(i),sess.run(output[0], feed_dict={x_batch: x_input[1:2]/255., y_s: expected_output[1:2]}))
     
     # cv2.waitKey(0)
     # cv2.destroyAllWindows()
