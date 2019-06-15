@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.getcwd(), 'lib'))
 import create_mnist_jpg as im_creator
 import basic_nn_batch as batch_nn
 import cnn 
+import cnn_gpu
 from PIL import Image
 import dataset as dt
 import cv2
@@ -21,7 +22,7 @@ filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
 
 sess = tf.Session()
-cnn.train_heigh_resolution(datasets, batch_size, (720, 1280), (360, 640), 3, sess)
+cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 # 預訓練影像生成
 # filenames = glob.glob('img_small_data_2x.tfrecords')

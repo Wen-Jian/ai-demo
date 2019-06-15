@@ -13,9 +13,9 @@ def add_cnn_layer(x_input, filter_shape, activation_function = None, strides=1):
     bias = tf.Variable(tf.constant(0.1, shape = [filter_shape[3]]))
     before_pooling = tf.nn.conv2d(x_input, cnn_filter, strides=[1,strides,strides,1], padding='SAME')  
     if (activation_function != None):
-        act_input = activation_function(before_pooling)
+        act_input = activation_function(before_pooling + bias)
     else:
-        act_input = tf.nn.relu(before_pooling + bias)
+        act_input = before_pooling + bias
     return act_input
     
 def add_deconv_layer(x_input, filter_shape, output_shape, activation_function=None, stride = 2):
