@@ -6,6 +6,8 @@ import scipy.misc
 import os
 import glob
 import sys
+import random
+from PIL import Image
 from tensorflow.examples.tutorials.mnist import input_data
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot = True)
@@ -53,12 +55,33 @@ def img_to_data_set(files_path = None):
         process_rate = float(count/len(filelist)) * 100
         images.append(_parse_function(file_name))
         print(np.shape(images))
-        sys.stdout.write("\rDoing thing %i ％" % process_rate)
+        sys.stdout.write("\rDoing thing %i ％" % process_rate + file_name)
         sys.stdout.flush()
         count += 1
     
     # dataset = tf.data.Dataset.from_tensor_slices((images, labels))
     return images
+
+def _int64_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
+def _bytes_feature(value):
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+def img_to_tfrecord(x_files_path, y_files_path):
+    tfrecord_filename = 'img_data.tfrecords'
+    writer = tf.python_io.TFRecordWriter(tfrecord_filename)
+    x_images = glob.glob(os.path.join(x_files_path, '*'))
+    y_images = glob.glob(os.path.join(y_files_path, '*'))
+    for index in range(0, len(x_images)):
+        x_img = Image.open(x_images[index])
+        y_img = Image.open(y_images[index])
+        feature = { 'x_image': _bytes_feature(x_img.tostring()),
+                    'y_image': _bytes_feature(y_img.tostring()) }
+        example = tf.train.Example(features=tf.train.Features(feature=feature))
+        writer.write(example.SerializeToString())
+    writer.close()
+
 
 def _parse_function(filename):
     image_np_array = cv2.imread(filename)
