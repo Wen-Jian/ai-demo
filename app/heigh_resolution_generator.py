@@ -15,7 +15,7 @@ import dataset as dt
 import cv2
 from skimage import exposure
 
-batch_size = 100
+batch_size = 1
 parameter_name = 'heigh_resolution_large_to_small_100p'
 # # 訓練代碼 用tfrecord
 filenames = glob.glob('img_small_data_2x.tfrecords')
@@ -149,15 +149,14 @@ cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 
 #         x_image_decoded = [tf.image.decode_image(image_string) for image_string in parsed_dataset['x_image']]
 #         y_image_decoded = [tf.image.decode_image(image_string) for image_string in parsed_dataset['y_image']]
 #         for index in range(0, len(y_image_decoded)):
-#                 if np.shape(x_image_decoded[index])[2] != 3:
-#                         print(filenames[index])
-#                         print(np.shape(y_image_decoded[index]))
+#                 print(filenames[index])
+#                 print(np.shape(x_image_decoded[index]))
                 
 #     break
-        # cv2.imshow('test', np.array(x_image_decoded[0]))
-        # cv2.waitKey(0)
-        # cv2.destroyAllWindows()
-        # x_imgs = tf.decode_raw(parsed_dataset['x_image'], tf.uint8)
+#         cv2.imshow('test', np.array(x_image_decoded[0]))
+#         cv2.waitKey(0)
+#         cv2.destroyAllWindows()
+#         x_imgs = tf.decode_raw(parsed_dataset['x_image'], tf.uint8)
 #         x_imgs = np.reshape(x_imgs, (np.shape(x_imgs)[0], input_shape[0], input_shape[1], channel_size))
 #         y_imgs = tf.decode_raw(parsed_dataset['y_image'], tf.float32)
 #         print(np.shape(y_imgs))
