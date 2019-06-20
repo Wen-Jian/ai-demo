@@ -28,27 +28,27 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
 
     # 七層CNN 同尺寸 低解 -> 高解
-    # with tf.device('/device:GPU:0'):
+    with tf.device('/device:GPU:0'):
 
-    # stage 1
-    y1 = cnn_with_batch_norm(x_s, [7, 7], 3, 64, 1)
+        # stage 1
+        y1 = cnn_with_batch_norm(x_s, [7, 7], 3, 64, 1)
 
-    y2 = cnn_with_batch_norm(y1, [1, 1], 64, 64, 1)
+        y2 = cnn_with_batch_norm(y1, [1, 1], 64, 64, 1)
 
-    y3 = cnn_with_batch_norm(y2, [3, 3], 64, 64, 1)
+        y3 = cnn_with_batch_norm(y2, [3, 3], 64, 64, 1)
 
-    y4 = cnn_with_batch_norm(y3, [3, 3], 64, 64, 1)
+        y4 = cnn_with_batch_norm(y3, [3, 3], 64, 64, 1)
 
-    y5 = cnn_with_batch_norm(y4, [3, 3], 64, 256, 1)
+        y5 = cnn_with_batch_norm(y4, [3, 3], 64, 256, 1)
 
-    # stage 1 x
-    x_ = cnn_with_batch_norm(x_s, [1,1], 3, 256, 1)
+        # stage 1 x
+        x_ = cnn_with_batch_norm(x_s, [1,1], 3, 256, 1)
 
-    mean, variance = tf.nn.moments(x_, [0,1,2])
-    x_bn = tf.nn.batch_normalization(x_, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
-    y1_act = tf.nn.relu(tf.add(y5, x_bn))
+        mean, variance = tf.nn.moments(x_, [0,1,2])
+        x_bn = tf.nn.batch_normalization(x_, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
+        y1_act = tf.nn.relu(tf.add(y5, x_bn))
 
-    pool = tf.nn.avg_pool(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
+        pool = tf.nn.avg_pool(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
 
     loss = tf.reduce_mean(tf.square(pool - y_s))
     
