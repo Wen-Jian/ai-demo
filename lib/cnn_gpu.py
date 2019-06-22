@@ -107,3 +107,45 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
         print(loss_val)
         # print(grad)
         # print(ori_loss)
+
+def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
+    iterator = datasets.make_one_shot_iterator()
+    dataset = iterator.get_next()
+    parsed_dataset = tf.parse_example(dataset, features={
+            'filename': tf.FixedLenFeature([], tf.string),
+            "x_image": tf.FixedLenFeature([], tf.string),
+            "y_image": tf.FixedLenFeature([], tf.string)})
+    x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
+    y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
+    
+    # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
+
+    # 七層CNN 同尺寸 低解 -> 高解
+    with tf.device('/device:GPU:0'):
+
+        # stage 1
+        y1 = cnn_with_batch_norm(x_s, [9, 9], 3, 64, 1)
+
+        y2 = cnn_with_batch_norm(y1, [1, 1], 64, 32, 1)
+
+        y3 = cnn_with_batch_norm(y2, [5, 5], 32, 3, 1)
+
+    loss = tf.reduce_mean(tf.square(y3 - y_s))
+    
+    optimizer = tf.train.AdamOptimizer(1e-4)
+    train_step = optimizer.minimize(loss)
+    varis = tf.trainable_variables()
+    gradients = optimizer.compute_gradients(loss)
+
+    if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
+        saver = tf.train.Saver()
+        saver.restore(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
+    else:
+        saver = tf.train.Saver()
+        sess.run(tf.global_variables_initializer())
+    while True:
+        count += 1
+        _, loss_val, grad = sess.run([train_step, loss, gradients])
+        saver.save(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
+        grad = [gradient for gradient, varis in grad]
+        print(loss_val)

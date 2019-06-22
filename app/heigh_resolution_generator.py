@@ -15,14 +15,14 @@ import dataset as dt
 import cv2
 from skimage import exposure
 
-batch_size = 1
+batch_size = 100
 parameter_name = 'heigh_resolution_large_to_small_100p'
 # # 訓練代碼 用tfrecord
 filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
 
 sess = tf.Session()
-cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 # 預訓練影像生成
 # filenames = glob.glob('img_small_data_2x.tfrecords')
