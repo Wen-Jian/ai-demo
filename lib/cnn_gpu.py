@@ -16,7 +16,7 @@ def cnn_with_batch_norm(x_s, k_size, input_features, output_features, strides):
 
 def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
     count = 0
-    iterator = tf.compat.v1.data.make_one_shot_iterator()
+    iterator = tf.compat.v1.data.make_one_shot_iterator(datasets)
     dataset = iterator.get_next()
     parsed_dataset = tf.io.parse_example(dataset, features={
             'filename': tf.io.FixedLenFeature([], tf.string),
@@ -109,7 +109,7 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
         # print(ori_loss)
 
 def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
-    iterator = tf.compat.v1.data.make_one_shot_iterator()
+    iterator = tf.compat.v1.data.make_one_shot_iterator(datasets)
     dataset = iterator.get_next()
     parsed_dataset = tf.io.parse_example(dataset, features={
             'filename': tf.io.FixedLenFeature([], tf.string),
