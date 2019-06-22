@@ -22,7 +22,7 @@ filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
 
 # 加上下面一行就可以使用 个gpu了
-config = tf.ConfigProto(allow_soft_placement=True)
+config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 # 这一行设置 gpu 随使用增长，我一般都会加上
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
