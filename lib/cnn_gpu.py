@@ -11,7 +11,7 @@ def cnn_with_batch_norm(x_s, k_size, input_features, output_features, strides):
     mean, variance = tf.nn.moments(y1, [0,1,2] if input_features > 1 else [0])
     A_1_bn = tf.nn.batch_normalization(y1, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
     y1_act = tf.nn.relu(A_1_bn)
-    A_1_pool = tf.nn.max_pool(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
+    A_1_pool = tf.nn.max_pool2d(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
     return A_1_pool
 
 def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
@@ -52,7 +52,7 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
 
     loss = tf.reduce_mean(tf.square(pool - y_s))
     
-    optimizer = tf.train.AdamOptimizer(1e-4)
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
     train_step = optimizer.minimize(loss)
     # grad_and_var = optimizer.compute_gradients(loss)
     varis = tf.trainable_variables()
@@ -132,7 +132,7 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
-    optimizer = tf.train.AdamOptimizer(1e-4)
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
     train_step = optimizer.minimize(loss)
     varis = tf.trainable_variables()
     gradients = optimizer.compute_gradients(loss)
