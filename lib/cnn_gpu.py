@@ -18,10 +18,10 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     count = 0
     iterator = datasets.make_one_shot_iterator()
     dataset = iterator.get_next()
-    parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+    parsed_dataset = tf.io.parse_example(dataset, features={
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
     
@@ -55,9 +55,9 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
     train_step = optimizer.minimize(loss)
     # grad_and_var = optimizer.compute_gradients(loss)
-    varis = tf.trainable_variables()
-    # gradients = tf.gradients(loss, tf.trainable_variables())
-    gradients = optimizer.compute_gradients(loss)
+    # varis =tf.compat.v1.trainable_variables()
+    # gradients = tf.gradients(loss,tf.compat.v1.trainable_variables())
+    # gradients = optimizer.compute_gradients(loss)
     # count = 0
 
     if os.path.isfile("trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p.index"):
@@ -70,7 +70,7 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     while True:
         count += 1
         _, loss_val, grad = sess.run([train_step, loss, gradients])
-        saver.save(sess, save_path="trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
+        saver.save(sess=sess, save_path="trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
         grad = [gradient for gradient, varis in grad]
         # file_path = file_path.decode("utf-8")
         # if loss_val < 100:
@@ -111,10 +111,10 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
 def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
     iterator = datasets.make_one_shot_iterator()
     dataset = iterator.get_next()
-    parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+    parsed_dataset = tf.io.parse_example(dataset, features={
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
     
@@ -134,16 +134,16 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     
     optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
     train_step = optimizer.minimize(loss)
-    varis = tf.trainable_variables()
+    varis =tf.compat.v1.trainable_variables()
     gradients = optimizer.compute_gradients(loss)
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver
-        saver.restore(sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.restore(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver
         sess.run(tf.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        saver.save(sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
         print(loss_val)
