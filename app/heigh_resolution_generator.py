@@ -15,7 +15,7 @@ import dataset as dt
 import cv2
 from skimage import exposure
 
-batch_size = 100
+batch_size = 30
 parameter_name = 'heigh_resolution_large_to_small_100p'
 # # 訓練代碼 用tfrecord
 filenames = glob.glob('img_small_data_2x.tfrecords')
