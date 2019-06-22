@@ -21,7 +21,11 @@ parameter_name = 'heigh_resolution_large_to_small_100p'
 filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
 
-sess = tf.Session()
+# 加上下面一行就可以使用 个gpu了
+config = tf.ConfigProto(allow_soft_placement=True)
+# 这一行设置 gpu 随使用增长，我一般都会加上
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
 cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 # 預訓練影像生成
