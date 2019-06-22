@@ -124,11 +124,11 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
         # stage 1
-        y1 = cnn.add_cnn_layer(x_s, [9, 9, 3, 64])
+        y1 = cnn.add_cnn_layer(x_s, [3, 3, 3, 32])
 
-        y2 = cnn.add_cnn_layer(y1, [1, 1, 64, 32])
+        y2 = cnn.add_cnn_layer(y1, [1, 1, 32, 16])
 
-        y3 = cnn.add_cnn_layer(y2, [5, 5, 32, 3])
+        y3 = cnn.add_cnn_layer(y2, [3, 3, 16, 3])
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     

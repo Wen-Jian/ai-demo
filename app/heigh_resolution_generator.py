@@ -26,6 +26,7 @@ config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 # 这一行设置 gpu 随使用增长，我一般都会加上
 config.gpu_options.allow_growth = True
 sess = tf.compat.v1.Session(config=config)
+# sess = tf.compat.v1.Session()
 cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 # 預訓練影像生成
