@@ -138,13 +138,12 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     gradients = optimizer.compute_gradients(loss)
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
-        saver = tf.train.Saver()
+        saver = tf.compat.v1.train.Saver
         saver.restore(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
     else:
-        saver = tf.train.Saver()
+        saver = tf.compat.v1.train.Saver
         sess.run(tf.global_variables_initializer())
     while True:
-        count += 1
         _, loss_val, grad = sess.run([train_step, loss, gradients])
         saver.save(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
         grad = [gradient for gradient, varis in grad]
