@@ -22,11 +22,11 @@ filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
 
 # 加上下面一行就可以使用 个gpu了
-config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
+# config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 # 这一行设置 gpu 随使用增长，我一般都会加上
-config.gpu_options.allow_growth = True
-sess = tf.compat.v1.Session(config=config)
-# sess = tf.compat.v1.Session()
+# config.gpu_options.allow_growth = True
+# sess = tf.compat.v1.Session(config=config)
+sess = tf.compat.v1.Session()
 cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 # 預訓練影像生成

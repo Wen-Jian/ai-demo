@@ -121,14 +121,14 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
 
     # 七層CNN 同尺寸 低解 -> 高解
-    with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
+    # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
-        # stage 1
-        y1 = cnn.add_cnn_layer(x_s, [9, 9, 3, 64])
+    # stage 1
+    y1 = cnn.add_cnn_layer(x_s, [9, 9, 3, 64])
 
-        y2 = cnn.add_cnn_layer(y1, [1, 1, 64, 32])
+    y2 = cnn.add_cnn_layer(y1, [1, 1, 64, 32])
 
-        y3 = cnn.add_cnn_layer(y2, [5, 5, 32, 3])
+    y3 = cnn.add_cnn_layer(y2, [5, 5, 32, 3])
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
