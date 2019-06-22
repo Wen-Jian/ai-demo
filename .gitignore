@@ -8,4 +8,4 @@ trained_parameters/
 .profile
 .python-version
 TensorBoard/
-image_generator_train/
+image_generator_train/*
