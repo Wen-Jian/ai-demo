@@ -1,0 +1,11 @@
+MNIST_data/
+MnistImage/
+.vscode/
+.DS_Store
+.Python
+trained_parameters/
+trained_parameters/
+.profile
+.python-version
+TensorBoard/
+image_generator_train/
