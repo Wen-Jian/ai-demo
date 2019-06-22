@@ -9,3 +9,4 @@ trained_parameters/
 .python-version
 TensorBoard/
 image_generator_train/*
+*.tfrecords

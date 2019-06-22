@@ -144,7 +144,6 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
         saver = tf.compat.v1.train.Saver
         sess.run(tf.global_variables_initializer())
     while True:
-        _, loss_val, grad = sess.run([train_step, loss, gradients])
+        _, loss_val = sess.run([train_step, loss])
         saver.save(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
-        grad = [gradient for gradient, varis in grad]
         print(loss_val)
