@@ -28,7 +28,7 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
 
     # 七層CNN 同尺寸 低解 -> 高解
-    with tf.device('/device:GPU:0'):
+    with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
         # stage 1
         y1 = cnn_with_batch_norm(x_s, [7, 7], 3, 64, 1)
@@ -121,7 +121,7 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
 
     # 七層CNN 同尺寸 低解 -> 高解
-    with tf.device('/device:GPU:0'):
+    with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
         # stage 1
         y1 = cnn_with_batch_norm(x_s, [9, 9], 3, 64, 1)
