@@ -65,7 +65,7 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
         saver.restore(sess, "trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver()
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
     # dest = '/Users/wen/Desktop/programing/AI_demo/image_generator_train/smaller_100/'
     while True:
         count += 1
@@ -124,25 +124,23 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
         # stage 1
-        y1 = cnn_with_batch_norm(x_s, [9, 9], 3, 64, 1)
+        y1 = cnn.add_cnn_layer(x_s, [9, 9], 3, 64, 1)
 
-        y2 = cnn_with_batch_norm(y1, [1, 1], 64, 32, 1)
+        y2 = cnn.add_cnn_layer(y1, [1, 1], 64, 32, 1)
 
-        y3 = cnn_with_batch_norm(y2, [5, 5], 32, 3, 1)
+        y3 = cnn.add_cnn_layer(y2, [5, 5], 32, 3, 1)
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
-    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
+    optimizer = tf.compat.v1.train.AdamOptimizer(0.1)
     train_step = optimizer.minimize(loss)
-    varis =tf.compat.v1.trainable_variables()
-    gradients = optimizer.compute_gradients(loss)
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver()
         saver.restore(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver()
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
         saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
