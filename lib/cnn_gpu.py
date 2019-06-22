@@ -61,16 +61,16 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     # count = 0
 
     if os.path.isfile("trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p.index"):
-        saver = tf.train.Saver()
+        saver = tf.compat.v1.train.Saver()
         saver.restore(sess, "trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
     else:
-        saver = tf.train.Saver()
+        saver = tf.compat.v1.train.Saver()
         sess.run(tf.global_variables_initializer())
     # dest = '/Users/wen/Desktop/programing/AI_demo/image_generator_train/smaller_100/'
     while True:
         count += 1
         _, loss_val, grad = sess.run([train_step, loss, gradients])
-        saver.save(sess, "trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
+        saver.save(sess, save_path="trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
         grad = [gradient for gradient, varis in grad]
         # file_path = file_path.decode("utf-8")
         # if loss_val < 100:
@@ -139,11 +139,11 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver
-        saver.restore(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.restore(sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver
         sess.run(tf.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        saver.save(sess, "trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.save(sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
         print(loss_val)

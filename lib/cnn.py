@@ -9,7 +9,7 @@ import re
 from shutil import copyfile
 
 def add_cnn_layer(x_input, filter_shape, activation_function = None, strides=1):
-    cnn_filter = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1))
+    cnn_filter = tf.Variable(tf.random.truncated_normal(filter_shape, stddev=0.1))
     bias = tf.Variable(tf.constant(0.1, shape = [filter_shape[3]]))
     before_pooling = tf.nn.conv2d(x_input, cnn_filter, strides=[1,strides,strides,1], padding='SAME')  
     if (activation_function != None):
@@ -127,9 +127,9 @@ def pre_train(datasets, batch_size, input_shape, output_shape, channel_size, ses
 
     dataset = iterator.get_next()
     parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     # x_const_255 = tf.constant(255, dtype=tf.float32, shape=[batch_size, input_shape[0], input_shape[1],channel_size])
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     x_casted = tf.cast(x_s, tf.uint8)
@@ -237,9 +237,9 @@ def img_generator_train_with_imgs(datasets, batch_size, input_shape, output_shap
 
     dataset = iterator.get_next()
     parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     x_casted = tf.cast(x_s, tf.uint8)
     y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
@@ -313,9 +313,9 @@ def train_heigh_resolution_generator(datasets, batch_size, input_shape, output_s
 
     dataset = iterator.get_next()
     parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
 
@@ -361,9 +361,9 @@ def train_heigh_resolution(datasets, batch_size, input_shape, output_shape, chan
     iterator = datasets.make_one_shot_iterator()
     dataset = iterator.get_next()
     parsed_dataset = tf.parse_example(dataset, features={
-            'filename': tf.FixedLenFeature([], tf.string),
-            "x_image": tf.FixedLenFeature([], tf.string),
-            "y_image": tf.FixedLenFeature([], tf.string)})
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
     x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
     y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
     
