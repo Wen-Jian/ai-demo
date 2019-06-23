@@ -124,15 +124,16 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
     # stage 1
-    y1 = cnn.add_cnn_layer(x_s, [9, 9, 3, 64])
+    y1 = cnn.add_cnn_layer(x_s, [3, 3, 3, 128])
 
-    y2 = cnn.add_cnn_layer(y1, [1, 1, 64, 32])
+    y2 = cnn.add_cnn_layer(y1, [1, 1, 128, 64])
 
-    y3 = cnn.add_cnn_layer(y2, [5, 5, 32, 3])
+    y3 = cnn.add_cnn_layer(y2, [3, 3, 64, 3])
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
-    optimizer = tf.compat.v1.train.AdamOptimizer(1e-12)
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
+
     train_step = optimizer.minimize(loss)
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
@@ -143,6 +144,41 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
         sess.run(tf.compat.v1.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        if loss_val < 300:
-        	saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        print(loss_val)
+
+def train_upscale_cnn_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
+    iterator = tf.compat.v1.data.make_one_shot_iterator(datasets)
+    dataset = iterator.get_next()
+    parsed_dataset = tf.io.parse_example(dataset, features={
+            'filename': tf.io.FixedLenFeature([], tf.string),
+            "x_image": tf.io.FixedLenFeature([], tf.string),
+            "y_image": tf.io.FixedLenFeature([], tf.string)})
+    x_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['x_image'][index]) for index in range(0, batch_size)], tf.float32)
+    y_s = tf.cast([tf.image.decode_jpeg(parsed_dataset['y_image'][index]) for index in range(0, batch_size)], tf.float32)
+    
+    # 七層CNN 同尺寸 低解 -> 高解
+    # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
+
+    # stage 1
+    y1 = cnn.add_deconv_layer(x_s, [3, 3, 3, 128])
+
+    y2 = cnn.add_cnn_layer(y1, [1, 1, 128, 32])
+
+    y3 = cnn.add_cnn_layer(y2, [3, 3, 32, 3])
+
+    loss = tf.reduce_mean(tf.square(y3 - y_s))
+    
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-6)
+    train_step = optimizer.minimize(loss)
+
+    if os.path.isfile("trained_parameters/upscale_" + str(batch_size) + "p.index"):
+        saver = tf.compat.v1.train.Saver()
+        saver.restore(sess=sess, save_path="trained_parameters/upscale_" + str(batch_size) + "p")
+    else:
+        saver = tf.compat.v1.train.Saver()
+        sess.run(tf.compat.v1.global_variables_initializer())
+    while True:
+        _, loss_val = sess.run([train_step, loss])
+        saver.save(sess=sess, save_path="trained_parameters/upscale_" + str(batch_size) + "p")
         print(loss_val)
