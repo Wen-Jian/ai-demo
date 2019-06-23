@@ -132,7 +132,7 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
-    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-12)
     train_step = optimizer.minimize(loss)
 
     if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
@@ -143,5 +143,6 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
         sess.run(tf.compat.v1.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        if loss_val < 300:
+        	saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
         print(loss_val)
