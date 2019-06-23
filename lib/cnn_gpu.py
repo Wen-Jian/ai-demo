@@ -136,15 +136,15 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
 
     train_step = optimizer.minimize(loss)
 
-    if os.path.isfile("trained_parameters/srcnn_" + str(batch_size) + "p.index"):
+    if os.path.isfile("trained_parameters/srcnn_f33" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver()
-        saver.restore(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.restore(sess=sess, save_path="trained_parameters/srcnn_f33" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver()
         sess.run(tf.compat.v1.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        saver.save(sess=sess, save_path="trained_parameters/srcnn_" + str(batch_size) + "p")
+        saver.save(sess=sess, save_path="trained_parameters/srcnn_f33" + str(batch_size) + "p")
         print(loss_val)
 
 def train_upscale_cnn_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
