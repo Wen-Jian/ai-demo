@@ -14,20 +14,35 @@ from PIL import Image
 import dataset as dt
 import cv2
 from skimage import exposure
+from heigh_resolution_generator_module import HeighResolutionGenerator 
 
-batch_size = 30
-parameter_name = 'heigh_resolution_large_to_small_100p'
+batch_size = 10
+parameter_name = 'upscale_128_3_layer_10p'
 # # 訓練代碼 用tfrecord
 filenames = glob.glob('img_small_data_2x.tfrecords')
 datasets = tf.data.TFRecordDataset(filenames).repeat(100).shuffle(1000).batch(batch_size)
+
+generator = HeighResolutionGenerator(datasets, batch_size, (180, 320), (360, 640), 3, model_name='srcnn_2x')
+generator.build_model()
+generator.train()
+
+# test_file_path = glob.glob('image_generator_train/x_360p/0129.jpg')
+# x_img = cv2.imread(test_file_path[0])
+# pred = generator.predit([x_img], (360, 640), 3)
+# cv2.imshow('image_test', pred)
+# cv2.imshow('origin', x_img)
+    
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 # 加上下面一行就可以使用 个gpu了
 # config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 # 这一行设置 gpu 随使用增长，我一般都会加上
 # config.gpu_options.allow_growth = True
 # sess = tf.compat.v1.Session(config=config)
-sess = tf.compat.v1.Session()
-cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+# sess = tf.compat.v1.Session()
+# cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+
 
 # 預訓練影像生成
 # filenames = glob.glob('img_small_data_2x.tfrecords')
@@ -64,10 +79,10 @@ cnn_gpu.train_srcnn_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
 
 
 # 生成測試影像
-# test_file_path = glob.glob('image_generator_train/x_360p/0032.jpg')
+# test_file_path = glob.glob('image_generator_train/180p/0129.jpg')
 # x_img = cv2.imread(test_file_path[0])
 # sess = tf.Session()
-# predit = cnn.generate_image([x_img], 1, (360, 640), (720, 1280), 3, sess, parameter_name)
+# predit = cnn.generate_image([x_img], 1, (180, 320), (360, 640), 3, sess, parameter_name)
 
 # # (bB, bG, bR) = cv2.split(x_img)
 

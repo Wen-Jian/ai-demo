@@ -21,7 +21,7 @@ import dataset
 
 # print(x_images)
 
-train_x_file_path = os.path.join(os.getcwd(),'image_generator_train/x_360p')
+train_x_file_path = os.path.join(os.getcwd(),'image_generator_train/180p')
 train_y_file_path = os.path.join(os.getcwd(),'image_generator_train/height_360p')
 
 dataset.img_to_small_size_tfrecord(train_x_file_path, train_y_file_path)
