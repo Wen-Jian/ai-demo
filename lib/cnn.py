@@ -281,32 +281,45 @@ def generate_image(x_image, batch_size, input_shape, output_shape, channel_size,
 
     x_s = tf.placeholder(tf.float32, [None, input_shape[0], input_shape[1], channel_size], "x_test")
   
-    # y1 = add_cnn_layer(x_s, [8, 8, 3, 32], strides=2)
+    # stage 1
+    # y1 = add_cnn_layer(x_s, [3, 3, 3, 64])
 
-    # y2 = add_cnn_layer(y1, [3, 3, 32, 64], strides=2)
+    # y2 = add_cnn_layer(y1, [1, 1, 64, 64])
 
-    # deconv_1 = add_deconv_layer(y2, [3, 3, 32, 64], [batch_size, tf.shape(y1)[1], tf.shape(y1)[2], 32], )
+    # y3 = add_cnn_layer(y2, [3, 3, 64, 64])
 
-    # deconv_2 = add_deconv_layer(deconv_1, [8, 8, 3, 32], [batch_size, tf.shape(x_s)[1], tf.shape(x_s)[2], tf.shape(x_s)[3]])
+    # y4 = add_cnn_layer(y3, [3, 3, 64, 64])
 
-    deconv_3 = add_deconv_layer(x_s, [3, 3, 3, 3], [batch_size, output_shape[0], output_shape[1], channel_size], stride=2)
+    # y5 = add_cnn_layer(y4, [3, 3, 64, 128])
 
-    avg_pooling = tf.nn.avg_pool(deconv_3, ksize=[1,2,2,1],strides=[1,1,1,1], padding='SAME')
+    # x_ = add_cnn_layer(x_s, [3, 3, 3, 128])
 
-    max_pooling = tf.nn.max_pool(deconv_3, ksize=[1,2,2,1],strides=[1,1,1,1], padding='SAME')
+    # y5_act = tf.nn.relu(tf.add(y5, x_))
 
-    output = tf.cast((deconv_3 + avg_pooling * 0.6), tf.uint8)
+    # y6 = add_cnn_layer(y5_act, [3, 3, 128, 3])
+
+    y1 = add_deconv_layer(x_s, [3, 3, 128, 3], [batch_size, output_shape[0], output_shape[1], 128])
+
+    y2 = add_cnn_layer(y1, [1, 1, 128, 32])
+
+    y3 = add_cnn_layer(y2, [3, 3, 32, 3])
+
+    
+
+    output_2 = tf.cast(tf.nn.max_pool(y3, ksize=[1,2,2,1],strides=[1,1,1,1], padding='SAME'), tf.uint8)
+    output = tf.cast(y3, tf.uint8)
 
     # sess = tf.Session()
     saver = tf.train.Saver()
 
     saver.restore(sess, "trained_parameters/" + parameter_name)
-    # cv2.imshow('image_test', np.array(sess.run(output, feed_dict={x_s: x_image})[0]))
-    # cv2.imshow('origin', np.array(sess.run(tf.cast(x_s, tf.uint8), feed_dict={x_s: x_image})[0]))
+    cv2.imshow('image_test', np.array(sess.run(output, feed_dict={x_s: x_image})[0]))
+    cv2.imshow('image_test_2', np.array(sess.run(output_2, feed_dict={x_s: x_image})[0]))
+    cv2.imshow('origin', np.array(sess.run(tf.cast(x_s, tf.uint8), feed_dict={x_s: x_image})[0]))
     
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
-    return np.array(sess.run(output, feed_dict={x_s: x_image})[0])
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    # return np.array(sess.run(output, feed_dict={x_s: x_image})[0])
 
 def train_heigh_resolution_generator(datasets, batch_size, input_shape, output_shape, channel_size, sess):
     iterator = datasets.make_one_shot_iterator()

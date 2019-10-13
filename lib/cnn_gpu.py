@@ -11,7 +11,7 @@ def cnn_with_batch_norm(x_s, k_size, input_features, output_features, strides):
     mean, variance = tf.nn.moments(y1, [0,1,2] if input_features > 1 else [0])
     A_1_bn = tf.nn.batch_normalization(y1, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
     y1_act = tf.nn.relu(A_1_bn)
-    A_1_pool = tf.nn.max_pool2d(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
+    A_1_pool = tf.nn.max_pool(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
     return A_1_pool
 
 def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_shape, channel_size, sess):
@@ -28,27 +28,29 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     # deconv_3 = add_deconv_layer(x_s, [3, 3, 32, 3], [batch_size, input_shape[0] * 2, input_shape[1] * 2, 32], stride=2)
 
     # 七層CNN 同尺寸 低解 -> 高解
-    with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
+    # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
         # stage 1
-        y1 = cnn_with_batch_norm(x_s, [7, 7], 3, 64, 1)
+    y1 = cnn_with_batch_norm(x_s, [3, 3], 3, 64, 1)
 
-        y2 = cnn_with_batch_norm(y1, [1, 1], 64, 64, 1)
+    y2 = cnn_with_batch_norm(y1, [1, 1], 64, 64, 1)
 
-        y3 = cnn_with_batch_norm(y2, [3, 3], 64, 64, 1)
+    y3 = cnn_with_batch_norm(y2, [3, 3], 64, 64, 1)
 
-        y4 = cnn_with_batch_norm(y3, [3, 3], 64, 64, 1)
+    y4 = cnn_with_batch_norm(y3, [3, 3], 64, 64, 1)
 
-        y5 = cnn_with_batch_norm(y4, [3, 3], 64, 256, 1)
+    y5 = cnn_with_batch_norm(y4, [3, 3], 64, 128, 1)
 
         # stage 1 x
-        x_ = cnn_with_batch_norm(x_s, [1,1], 3, 256, 1)
+    x_ = cnn_with_batch_norm(x_s, [1,1], 3, 128, 1)
 
-        mean, variance = tf.nn.moments(x_, [0,1,2])
-        x_bn = tf.nn.batch_normalization(x_, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
-        y1_act = tf.nn.relu(tf.add(y5, x_bn))
+    mean, variance = tf.nn.moments(x_, [0,1,2])
+    x_bn = tf.nn.batch_normalization(x_, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
+    y5_act = tf.nn.relu(tf.add(y5, x_bn))
 
-        pool = tf.nn.avg_pool(y1_act, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
+    y6 = cnn_with_batch_norm(y5_act, [3,3], 128, 3, 1)
+
+    pool = tf.nn.avg_pool(y6, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
 
     loss = tf.reduce_mean(tf.square(pool - y_s))
     
@@ -60,18 +62,18 @@ def train_heigh_resolution_with_gpu(datasets, batch_size, input_shape, output_sh
     # gradients = optimizer.compute_gradients(loss)
     # count = 0
 
-    if os.path.isfile("trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p.index"):
+    if os.path.isfile("trained_parameters/heigh_resolution_resnet_" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver()
-        saver.restore(sess, "trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
+        saver.restore(sess, "trained_parameters/heigh_resolution_resnet_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver()
         sess.run(tf.compat.v1.global_variables_initializer())
     # dest = '/Users/wen/Desktop/programing/AI_demo/image_generator_train/smaller_100/'
     while True:
         count += 1
-        _, loss_val, grad = sess.run([train_step, loss, gradients])
-        saver.save(sess=sess, save_path="trained_parameters/heigh_resolution_large_to_small_with_fv_" + str(batch_size) + "p")
-        grad = [gradient for gradient, varis in grad]
+        _, loss_val = sess.run([train_step, loss])
+        saver.save(sess=sess, save_path="trained_parameters/heigh_resolution_resnet_" + str(batch_size) + "p")
+        # grad = [gradient for gradient, varis in grad]
         # file_path = file_path.decode("utf-8")
         # if loss_val < 100:
         #     count += 1
@@ -124,13 +126,44 @@ def train_srcnn_gpu(datasets, batch_size, input_shape, output_shape, channel_siz
     # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
     # stage 1
-    y1 = cnn.add_cnn_layer(x_s, [3, 3, 3, 128])
+    y1 = cnn.add_cnn_layer(x_s, [3, 3, 3, 64])
 
-    y2 = cnn.add_cnn_layer(y1, [1, 1, 128, 64])
+    y2 = cnn.add_cnn_layer(y1, [1, 1, 64, 64])
 
-    y3 = cnn.add_cnn_layer(y2, [3, 3, 64, 3])
+    y3 = cnn.add_cnn_layer(y2, [3, 3, 64, 64])
 
-    loss = tf.reduce_mean(tf.square(y3 - y_s))
+    y4 = cnn.add_cnn_layer(y3, [3, 3, 64, 64])
+
+    y5 = cnn.add_cnn_layer(y4, [3, 3, 64, 128])
+
+    x_ = cnn.add_cnn_layer(x_s, [3, 3, 3, 128])
+
+    y5_act = tf.nn.relu(tf.add(y5, x_))
+
+    y6 = cnn.add_cnn_layer(y5_act, [3, 3, 128, 3])
+
+    # y1 = cnn_with_batch_norm(x_s, [3, 3], 3, 64, 1)
+
+    # y2 = cnn_with_batch_norm(y1, [1, 1], 64, 64, 1)
+
+    # y3 = cnn_with_batch_norm(y2, [3, 3], 64, 64, 1)
+
+    # y4 = cnn_with_batch_norm(y3, [3, 3], 64, 64, 1)
+
+    # y5 = cnn_with_batch_norm(y4, [3, 3], 64, 128, 1)
+
+        # stage 1 x
+    # x_ = cnn_with_batch_norm(x_s, [1,1], 3, 128, 1)
+
+    # mean, variance = tf.nn.moments(x_, [0,1,2])
+    # x_bn = tf.nn.batch_normalization(x_, mean=mean, variance=variance, offset=None, scale=None, variance_epsilon=1e-4)
+    # y5_act = tf.nn.relu(tf.add(y5, x_bn))
+
+    # y6 = cnn_with_batch_norm(y5_act, [3,3], 128, 3, 1)
+
+    # pool = tf.nn.avg_pool(y6, ksize=(1, 3, 3, 1), strides=(1, 1, 1, 1), padding='SAME')
+
+    loss = tf.reduce_mean(tf.square(y6 - y_s))
     
     optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
 
@@ -161,7 +194,7 @@ def train_upscale_cnn_gpu(datasets, batch_size, input_shape, output_shape, chann
     # with tf.device('/job:localhost/replica:0/task:0/device:XLA_GPU:0'):
 
     # stage 1
-    y1 = cnn.add_deconv_layer(x_s, [3, 3, 3, 128])
+    y1 = cnn.add_deconv_layer(x_s, [3, 3, 128, 3], [batch_size, output_shape[0], output_shape[1], 128])
 
     y2 = cnn.add_cnn_layer(y1, [1, 1, 128, 32])
 
@@ -169,16 +202,16 @@ def train_upscale_cnn_gpu(datasets, batch_size, input_shape, output_shape, chann
 
     loss = tf.reduce_mean(tf.square(y3 - y_s))
     
-    optimizer = tf.compat.v1.train.AdamOptimizer(1e-6)
+    optimizer = tf.compat.v1.train.AdamOptimizer(1e-4)
     train_step = optimizer.minimize(loss)
 
-    if os.path.isfile("trained_parameters/upscale_" + str(batch_size) + "p.index"):
+    if os.path.isfile("trained_parameters/upscale_128_3_layer_" + str(batch_size) + "p.index"):
         saver = tf.compat.v1.train.Saver()
-        saver.restore(sess=sess, save_path="trained_parameters/upscale_" + str(batch_size) + "p")
+        saver.restore(sess=sess, save_path="trained_parameters/upscale_128_3_layer_" + str(batch_size) + "p")
     else:
         saver = tf.compat.v1.train.Saver()
         sess.run(tf.compat.v1.global_variables_initializer())
     while True:
         _, loss_val = sess.run([train_step, loss])
-        saver.save(sess=sess, save_path="trained_parameters/upscale_" + str(batch_size) + "p")
+        saver.save(sess=sess, save_path="trained_parameters/upscale_128_3_layer_" + str(batch_size) + "p")
         print(loss_val)

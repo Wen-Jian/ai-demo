@@ -1,0 +1,75 @@
+Traceback (most recent call last):
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1356, in _do_call
+    return fn(*args)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1341, in _run_fn
+    options, feed_dict, fetch_list, target_list, run_metadata)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1429, in _call_tf_sessionrun
+    run_metadata)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Incompatible shapes: [1,720,1280,256] vs. [1,360,640,3]
+	 [[{{node gradients_1/sub_grad/BroadcastGradientArgs}}]]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "app/heigh_resolution_generator.py", line 25, in <module>
+    cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+  File "/home/wen/programming/ai-demo/lib/cnn_gpu.py", line 72, in train_heigh_resolution_with_gpu
+    _, loss_val, grad = sess.run([train_step, loss, gradients])
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 950, in run
+    run_metadata_ptr)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1173, in _run
+    feed_dict_tensor, options, run_metadata)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1350, in _do_run
+    run_metadata)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/client/session.py", line 1370, in _do_call
+    raise type(e)(node_def, op, message)
+tensorflow.python.framework.errors_impl.InvalidArgumentError: Incompatible shapes: [1,720,1280,256] vs. [1,360,640,3]
+	 [[node gradients_1/sub_grad/BroadcastGradientArgs (defined at /home/wen/programming/ai-demo/lib/cnn_gpu.py:60) ]]
+
+Original stack trace for 'gradients_1/sub_grad/BroadcastGradientArgs':
+  File "app/heigh_resolution_generator.py", line 25, in <module>
+    cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+  File "/home/wen/programming/ai-demo/lib/cnn_gpu.py", line 60, in train_heigh_resolution_with_gpu
+    gradients = optimizer.compute_gradients(loss)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/training/optimizer.py", line 512, in compute_gradients
+    colocate_gradients_with_ops=colocate_gradients_with_ops)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gradients_impl.py", line 158, in gradients
+    unconnected_gradients)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gradients_util.py", line 731, in _GradientsHelper
+    lambda: grad_fn(op, *out_grads))
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gradients_util.py", line 403, in _MaybeCompile
+    return grad_fn()  # Exit early
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gradients_util.py", line 731, in <lambda>
+    lambda: grad_fn(op, *out_grads))
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/math_grad.py", line 1027, in _SubGrad
+    rx, ry = gen_array_ops.broadcast_gradient_args(sx, sy)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gen_array_ops.py", line 829, in broadcast_gradient_args
+    "BroadcastGradientArgs", s0=s0, s1=s1, name=name)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 788, in _apply_op_helper
+    op_def=op_def)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3616, in create_op
+    op_def=op_def)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 2005, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+...which was originally created as op 'sub', defined at:
+  File "app/heigh_resolution_generator.py", line 25, in <module>
+    cnn_gpu.train_heigh_resolution_with_gpu(datasets, batch_size, (360, 640), (360, 640), 3, sess)
+  File "/home/wen/programming/ai-demo/lib/cnn_gpu.py", line 53, in train_heigh_resolution_with_gpu
+    loss = tf.reduce_mean(tf.square(pool - y_s))
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py", line 884, in binary_op_wrapper
+    return func(x, y, name=name)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py", line 10855, in sub
+    "Sub", x=x, y=y, name=name)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py", line 788, in _apply_op_helper
+    op_def=op_def)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py", line 507, in new_func
+    return func(*args, **kwargs)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 3616, in create_op
+    op_def=op_def)
+  File "/home/wen/anaconda3/envs/py36/lib/python3.6/site-packages/tensorflow/python/framework/ops.py", line 2005, in __init__
+    self._traceback = tf_stack.extract_stack()
+
+(py36) wen@tensoflow-gpu:~/programming/ai-demo$ 

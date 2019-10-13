@@ -130,10 +130,10 @@ class HeighResolutionGenerator:
 
         return out_put[0]
     
-    def two_times_srcnn_predit(self):
+    def two_times_srcnn_predit(self, image, input_shape, channel_size):
         x_s = tf.placeholder(tf.float32, [None, input_shape[0], input_shape[1], channel_size], "x_test")
 
-        y1 = cnn.add_deconv_layer(x_s, [3, 3, 128, 3], [self.batch_size, self.output_shape[0], self.output_shape[1], 128])
+        y1 = cnn.add_deconv_layer(x_s, [3, 3, 128, 3], [batch_size, input_shape[0]*2, output_shape[1]*2, 128])
 
         y2 = cnn.add_cnn_layer(y1, [1, 1, 128, 32])
 
